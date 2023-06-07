@@ -22,7 +22,8 @@
     "commander": "^10.0.1",
     "grunt": "^1.6.1",
     "grunt-contrib-copy": "^1.0.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "nexe": "^4.0.0-rc.2"
   },
   "dependencies": {
     "@types/js-yaml": "^4.0.5",

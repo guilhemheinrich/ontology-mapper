@@ -20,14 +20,15 @@ export default class OWL_Mapper {
     static readonly GENERATED_MAPPINGS_KEY = "GENERATED_MAPPING_FILE"
 
     ontologie_triple: Quad[] = []
-    RDF_handler: Owl_Parser = new Owl_Parser()
+    RDF_handler: Owl_Parser
 
-    private constructor() {
+    private constructor(additional_prefix_array: string[] = []) {
+        this.RDF_handler = new Owl_Parser(additional_prefix_array) 
     }
 
-    static async getInstance(ontologies_source_path: string) {
+    static async getInstance(ontologies_source_path: string, additional_prefix_array: string[] = []) {
         if (!this.instance) {
-            this.instance = new OWL_Mapper()
+            this.instance = new OWL_Mapper(additional_prefix_array)
             await this.instance.initializePrefixes(ontologies_source_path)
             await this.instance.initializeOntologie(ontologies_source_path)
         }

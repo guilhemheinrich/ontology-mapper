@@ -1,33 +1,33 @@
 import * as dotenv from 'dotenv'
 import rdfParser from "rdf-parse"
 import { Quad } from "rdf-js"
-import fs, { PathLike } from 'fs-extra'
+import fs from 'fs-extra'
 import path from 'path'
 import yaml from 'js-yaml'
 import { walker_recursive_sync } from '../Helper/walker'
 import camelize from '../Helper/camelize'
 import array_unifier from '../Helper/array_unifier'
-import { Gql_Generator } from './processRdf'
+import { Owl_Parser } from './processRdf'
 import { Optional_Class_Mapping_constructorI, Erasable_Property_Mapping_constructor, Property_Mapping_constructor, Class_Mapping_constructorI } from '../Type/Mapping'
 import * as stream from 'stream/promises'
 import { NamedNode } from 'n3'
 dotenv.config()
 
-export default class RDFserializer_service {
-    private static instance: RDFserializer_service
+export default class OWL_Mapper {
+    private static instance: OWL_Mapper
     static readonly ONTOLOGIES_FOLDER_KEY = "ONTOLOGIES_FOLDER"
     static readonly MAPPINGS_FILE_KEY = "MAPPINGS_FILE"
     static readonly GENERATED_MAPPINGS_KEY = "GENERATED_MAPPING_FILE"
 
     ontologie_triple: Quad[] = []
-    RDF_handler: Gql_Generator = new Gql_Generator()
+    RDF_handler: Owl_Parser = new Owl_Parser()
 
     private constructor() {
     }
 
-    static async getInstance(ontologies_source_path?: string) {
+    static async getInstance(ontologies_source_path: string) {
         if (!this.instance) {
-            this.instance = new RDFserializer_service()
+            this.instance = new OWL_Mapper()
             await this.instance.initializePrefixes(ontologies_source_path)
             await this.instance.initializeOntologie(ontologies_source_path)
         }
@@ -48,8 +48,8 @@ export default class RDFserializer_service {
         return contentType
     }
 
-    private async initializePrefixes(ontologies_source_path?: string) {
-        const ontologies_path = ontologies_source_path || <string>process.env[RDFserializer_service.ONTOLOGIES_FOLDER_KEY]
+    private async initializePrefixes(ontologies_source_path: string) {
+        const ontologies_path = ontologies_source_path
         const prefixParse: Promise<unknown>[] = []
 
         if (fs.lstatSync(ontologies_path).isDirectory()) {
@@ -64,7 +64,7 @@ export default class RDFserializer_service {
                         })
                     })
                     .on('data', () => { })
-                    .on('error', (error) => console.error(error))
+                    .on('error', (error: any) => console.error(error))
                     .on('end', () => {
                         console.log('finished reading prefixes from ' + filename)
                     });
@@ -88,7 +88,7 @@ export default class RDFserializer_service {
                     })
                 })
                 .on('data', () => { })
-                .on('error', (error) => console.error(error))
+                .on('error', (error: any) => console.error(error))
                 .on('end', () => {
                     console.log('finished reading prefixes from ' + filename)
                 });
@@ -96,8 +96,8 @@ export default class RDFserializer_service {
 
     }
 
-    private async initializeOntologie(ontologies_source_path?: string) {
-        const ontologies_path = ontologies_source_path || <string>process.env[RDFserializer_service.ONTOLOGIES_FOLDER_KEY]
+    private async initializeOntologie(ontologies_source_path: string) {
+        const ontologies_path = ontologies_source_path
         // const prefixParse: Promise<unknown>[] = []
         const allParse: Promise<unknown>[] = []
         if (fs.lstatSync(ontologies_path).isDirectory()) {
@@ -107,7 +107,7 @@ export default class RDFserializer_service {
                     .on('data', (quad: Quad) => {
                         this.RDF_handler.processRdf(quad)
                     })
-                    .on('error', (error) => console.error(error))
+                    .on('error', (error: any) => console.error(error))
                     .on('end', () => {
                         console.log('finished reading quad from ' + filename)
 
@@ -126,7 +126,7 @@ export default class RDFserializer_service {
                 .on('data', (quad: Quad) => {
                     this.RDF_handler.processRdf(quad)
                 })
-                .on('error', (error) => console.error(error))
+                .on('error', (error: any) => console.error(error))
                 .on('end', () => {
                     console.log('finished reading quad from ' + filename)
 
@@ -142,11 +142,11 @@ export default class RDFserializer_service {
 
     }
 
-    writeMappings(output_path?: string) {
+    writeMappings(output_path: string) {
         const mappings = this.mapping_templater()
         const prefixes = this.prefixes_templater()
 
-        fs.writeFileSync(output_path || <string>process.env[RDFserializer_service.GENERATED_MAPPINGS_KEY], yaml.dump({ Prefixes: prefixes, Specific: mappings }), { encoding: "utf-8" })
+        fs.writeFileSync(output_path, yaml.dump({ Prefixes: prefixes, Specific: mappings }), { encoding: "utf-8" })
     }
 
     shortener(uri: string) {

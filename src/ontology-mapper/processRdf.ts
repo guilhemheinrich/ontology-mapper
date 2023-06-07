@@ -1,6 +1,7 @@
 import { stringify } from "querystring"
 import { Quad } from "rdf-js"
 import Prefixer from "./prefixes/Prefix";
+import standardPrefix from "./prefixes/standard_prefixes.json"
 export interface Gql_Resource {
     // Graphql layer
     class_uri: string,
@@ -69,7 +70,7 @@ class Gql_Resource_Dictionary {
         return new Proxy(this, handler)
     }
 }
-export class Gql_Generator {
+export class Owl_Parser {
 
     static options = {
         // Additional label to add to every node
@@ -84,14 +85,12 @@ export class Gql_Generator {
     readonly gql_resources_preprocesing: Gql_Resource_Dictionary = new Gql_Resource_Dictionary()
 
     /**
-     * Creates an instance of Gql_Generator.
+     * Creates an instance of Owl_Parser.
      * @date 23/11/2021
      * @param {{prefix: string, uri: string}[]} prefixes_array
-     * @memberof Gql_Generator
+     * @memberof Owl_Parser
      */
-    constructor(array_pathes_to_prefixes: string[] = [
-        __dirname + '/./prefixes/standard_prefixes.json'
-    ]) {
+    constructor(array_pathes_to_prefixes: string[] = []) {
         // Add owl:Thing in gqlResource
         this.prefix_handler = new Prefixer(array_pathes_to_prefixes)
         this.gql_resources_preprocesing[this.expender('owl:Thing')] = {
@@ -117,7 +116,7 @@ export class Gql_Generator {
      * @example http://my/ontologie#item => ontology_prefix:item
      * @param {string} uri
      * @return {*}  {string} Return the uri with prefixed format
-     * @memberof Gql_Generator
+     * @memberof Owl_Parser
      */
     prefixer(uri: string): string {
         let prefix_uri = this.prefix_handler.getPrefixAndUriFromUri(uri)
@@ -131,7 +130,7 @@ export class Gql_Generator {
      * @example ontology_prefix:item => http://my/ontologie#item
      * @param {string} short_uri
      * @return {*}  {string}
-     * @memberof Gql_Generator
+     * @memberof Owl_Parser
      */
     expender(short_uri: string): string {
         let [prefix, suffix] = short_uri.split(':')
@@ -151,7 +150,7 @@ export class Gql_Generator {
      * @param {string} class_uri
      * @param {boolean} n10s_compliant
      * @return {*}  {string}
-     * @memberof Gql_Generator
+     * @memberof Owl_Parser
      */
     shortener(class_uri: string, n10s_compliant: boolean = true): string {
         // Extremely permissive url SchemaMetaFieldDef, but lead to error: (^[^#]*[\/#])([^/#]*)$
@@ -492,7 +491,7 @@ export class Gql_Generator {
             //     ${template_properties.map((prop) => property_templater(prop)).join('\n                ')}
             // }            
             // `
-            let additionalLabels = Gql_Generator.options.additionalNodeLabels.concat(template_inherits)
+            let additionalLabels = Owl_Parser.options.additionalNodeLabels.concat(template_inherits)
             let template = `
             type ${shortname} ${additionalLabels.length > 0 ? '@node(additionalLabels: [' + additionalLabels.map((short_uri) => '"' + short_uri + '"').join(',') + '])' : ''}{
                 uri: ID! ${template_properties.length > 0 ? '\n                ' + template_properties.map((prop) => property_templater(prop)).join('\n                ') : ''}
@@ -505,7 +504,7 @@ export class Gql_Generator {
     }
 }
 
-export const RDF_parser = new Gql_Generator()
+export const RDF_parser = new Owl_Parser()
 export default RDF_parser
 
 

@@ -2,6 +2,7 @@
 
 import path from 'path'
 import fs from 'fs-extra'
+import default_prefix from './standard_prefixes.json'
 
 type prefix_array = {prefix: string, uri: string}[]
 export class Prefixer {
@@ -15,6 +16,7 @@ export class Prefixer {
         'com'
     ]
     constructor(prefix_files: string[] = []) {
+        this.prefix_array = default_prefix
         for (let _path of prefix_files) {
             let JSON_content: prefix_array = []
             try {

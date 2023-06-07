@@ -1,7 +1,7 @@
 import * as commander from 'commander'
 import * as path from 'path';
 import * as fs from 'fs-extra'
-import RDFserializer_service from './src/ontology-mapper/ontology-mapper'
+import OWL_Mapper from './src/ontology-mapper/ontology-mapper'
 import * as dotenv from 'dotenv'
 
 const cli = new commander.Command()
@@ -13,7 +13,7 @@ dotenv.config()
 
 export const module = {
     async execute(ontologies_folder: string, generated_mapping: string) {
-        const rdf_service = await RDFserializer_service.getInstance(ontologies_folder)
+        const rdf_service = await OWL_Mapper.getInstance(ontologies_folder)
         fs.ensureDirSync(path.dirname(generated_mapping))
         rdf_service.writeMappings(generated_mapping)
     }
@@ -28,7 +28,7 @@ cli
     .action((cmdObj) => {
         // path from the input
         root_input_path = path.resolve(BASE_CALL_DIR, cmdObj.ontologies_source ?? <string>process.env["ONTOLOGIES_FOLDER"] ?? ".")
-        root_output_path = path.resolve(BASE_CALL_DIR, cmdObj.generated_mapping_file ?? <string>process.env["GENERATED_MAPPING_FILE"]?? "generated.yaml")
+        root_output_path = path.resolve(BASE_CALL_DIR, cmdObj.generated_mapping_file ?? <string>process.env["GENERATED_MAPPING_DESTINATION"]?? "generated.yaml")
         console.log(`
     ontologies source path: ${root_input_path}
     generated mappings path: ${root_output_path}

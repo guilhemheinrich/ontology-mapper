@@ -28,7 +28,7 @@ jobs:
         
     - name: nexe build
       run: |
-        npx nexe -i ./out/mapping-generator.js --verbose
+        npx nexe -i ./out/mapping-generator.js --verbose --build
         
     - name: upload build
       uses: actions/upload-artifact@v3
